@@ -83,6 +83,7 @@ public:
         m_iconCanvas(),
         m_bitmapWidget(),
         m_textWidget("\\calign?"),
+        m_apiVersion("3.0"),
         m_apiKey(""),
         m_latitude("48.858"),/* Example data */
         m_longitude("2.295"),/* Example data */
@@ -462,6 +463,7 @@ private:
     WidgetGroup                 m_iconCanvas;               /**< Canvas used for the bitmap widget. */
     BitmapWidget                m_bitmapWidget;             /**< Bitmap widget, used to show the icon. */
     TextWidget                  m_textWidget;               /**< Text widget, used for showing the text. */
+    String                      m_apiVersion;               /**< One Call API version */
     String                      m_apiKey;                   /**< OpenWeather API Key */
     String                      m_latitude;                 /**< The latitude. */
     String                      m_longitude;                /**< The longitude. */

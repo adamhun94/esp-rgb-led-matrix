@@ -44,11 +44,12 @@
                     <li>PLUGIN-ALIAS: The plugin alias name.</li>
                 </ul>
                 <h3 class="mt-1">Set OpenWeather related configuration.</h3>
-                <pre name="injectOrigin" class="text-light"><code>POST {{ORIGIN}}/rest/api/v1/display/uid/&lt;PLUGIN-UID&gt;/weather?apiKey=&lt;API-KEY&gt;&latitude=&lt;LATITUDE&gt;&longitude=&lt;LONGITUDE&gt;&other=&lt;OTHER&gt;&units=&lt;UNITS&gt;</code></pre>
-                <pre name="injectOrigin" class="text-light"><code>POST {{ORIGIN}}/rest/api/v1/display/alias/&lt;PLUGIN-ALIAS&gt;/weather?apiKey=&lt;API-KEY&gt;&latitude=&lt;LATITUDE&gt;&longitude=&lt;LONGITUDE&gt;&other=&lt;OTHER&gt;&units=&lt;UNITS&gt;</code></pre>
+                <pre name="injectOrigin" class="text-light"><code>POST {{ORIGIN}}/rest/api/v1/display/uid/&lt;PLUGIN-UID&gt;/weather?apiVersion=&lt;API-VERSION&gt;&apiKey=&lt;API-KEY&gt;&latitude=&lt;LATITUDE&gt;&longitude=&lt;LONGITUDE&gt;&other=&lt;OTHER&gt;&units=&lt;UNITS&gt;</code></pre>
+                <pre name="injectOrigin" class="text-light"><code>POST {{ORIGIN}}/rest/api/v1/display/alias/&lt;PLUGIN-ALIAS&gt;/weather?apiVersion=&lt;API-VERSION&gt;&apiKey=&lt;API-KEY&gt;&latitude=&lt;LATITUDE&gt;&longitude=&lt;LONGITUDE&gt;&other=&lt;OTHER&gt;&units=&lt;UNITS&gt;</code></pre>
                 <ul>
                     <li>PLUGIN-UID: The plugin unique id.</li>
                     <li>PLUGIN-ALIAS: The plugin alias name.</li>
+                    <li>API-VERSION: The One Call api version. <code>3.0</code> or <code>2.5</code></li>
                     <li>API-KEY: The OpenWeather api key.</li>
                     <li>LATITUDE: The latitude of the location.</li>
                     <li>LONGITUDE: The longitude of the location.</li>
@@ -62,6 +63,13 @@
                         <label for="pluginUid">Plugin UID:</label>
                         <select id="pluginUid" size="1" onChange="getConfig(pluginUid.options[pluginUid.selectedIndex].value)">
                         </select>    
+                    </div>
+                    <div class="form-group">
+                        <label for="apiVersion">One Call API version:</label>
+                        <select id="apiVersion" size="1">
+                            <option value="3.0">3.0</option>
+                            <option value="2.5">2.5</option>
+                        </select>   
                     </div>
                     <div class="form-group">
                         <label for="apiKey">API key:</label>
@@ -174,6 +182,7 @@
                     url: "/rest/api/v1/display/uid/" + pluginUid + "/weather",
                     isJsonResponse: true
                 }).then(function(rsp) {
+                    $("#apiVersion").val(rsp.data.apiVersion);
                     $("#apiKey").val(rsp.data.apiKey);
                     $("#latitude").val(rsp.data.latitude);
                     $("#longitude").val(rsp.data.longitude);
@@ -194,6 +203,7 @@
                     url: "/rest/api/v1/display/uid/" + pluginUid + "/weather",
                     isJsonResponse: true,
                     parameter: {
+                        apiVersion: $("#apiVersion").val(),
                         apiKey: $("#apiKey").val(),
                         latitude: $("#latitude").val(),
                         longitude: $("#longitude").val(),

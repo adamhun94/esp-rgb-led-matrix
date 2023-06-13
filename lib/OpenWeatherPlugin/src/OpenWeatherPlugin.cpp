@@ -143,6 +143,7 @@ bool OpenWeatherPlugin::setTopic(const String& topic, const JsonObject& value)
         const size_t        JSON_DOC_SIZE           = 512U;
         DynamicJsonDocument jsonDoc(JSON_DOC_SIZE);
         JsonObject          jsonCfg                 = jsonDoc.to<JsonObject>();
+        JsonVariantConst    jsonApiVersion          = value["apiVersion"];
         JsonVariantConst    jsonApiKey              = value["apiKey"];
         JsonVariantConst    jsonLatitude            = value["latitude"];
         JsonVariantConst    jsonLongitude           = value["longitude"];
@@ -159,6 +160,12 @@ bool OpenWeatherPlugin::setTopic(const String& topic, const JsonObject& value)
          * Check only for the key/value pair availability.
          * The type check will follow in the setConfiguration().
          */
+        
+        if (false == jsonApiVersion.isNull())
+        {
+            jsonCfg["apiVersion"] = jsonApiVersion.as<String>();
+            isSuccessful = true;
+        }
 
         if (false == jsonApiKey.isNull())
         {
@@ -483,6 +490,7 @@ void OpenWeatherPlugin::getConfiguration(JsonObject& jsonCfg) const
 {
     MutexGuard<MutexRecursive> guard(m_mutex);
 
+    jsonCfg["apiVersion"]   = m_apiVersion;
     jsonCfg["apiKey"]       = m_apiKey;
     jsonCfg["latitude"]     = m_latitude;
     jsonCfg["longitude"]    = m_longitude;
@@ -493,13 +501,18 @@ void OpenWeatherPlugin::getConfiguration(JsonObject& jsonCfg) const
 bool OpenWeatherPlugin::setConfiguration(JsonObjectConst& jsonCfg)
 {
     bool                status          = false;
+    JsonVariantConst    jsonApiVersion  = jsonCfg["apiVersion"];
     JsonVariantConst    jsonApiKey      = jsonCfg["apiKey"];
     JsonVariantConst    jsonLatitude    = jsonCfg["latitude"];
     JsonVariantConst    jsonLongitude   = jsonCfg["longitude"];
     JsonVariantConst    jsonOther       = jsonCfg["other"];
     JsonVariantConst    jsonUnits       = jsonCfg["units"];
 
-    if (false == jsonApiKey.is<String>())
+    if (false == jsonApiVersion.is<String>())
+    {
+        LOG_WARNING("One Call API version not found or invalid type.");
+    }
+    else if (false == jsonApiKey.is<String>())
     {
         LOG_WARNING("API key not found or invalid type.");
     }
@@ -523,6 +536,7 @@ bool OpenWeatherPlugin::setConfiguration(JsonObjectConst& jsonCfg)
     {
         MutexGuard<MutexRecursive> guard(m_mutex);
 
+        m_apiVersion            = jsonApiVersion.as<String>();
         m_apiKey                = jsonApiKey.as<String>();
         m_latitude              = jsonLatitude.as<String>();
         m_longitude             = jsonLongitude.as<String>();
@@ -704,12 +718,15 @@ bool OpenWeatherPlugin::startHttpRequest()
     if ((false == m_latitude.isEmpty()) &&
         (false == m_longitude.isEmpty()) &&
         (false == m_units.isEmpty()) &&
-        (false == m_apiKey.isEmpty()))
+        (false == m_apiKey.isEmpty()) &&
+        (false == m_apiVersion.isEmpty()))
     {
         String url = OPEN_WEATHER_BASE_URI;
 
         /* Get current weather information: https://openweathermap.org/api/one-call-api */
-        url += "/data/2.5/onecall?lat=";
+        url += "/data/";
+        url += m_apiVersion;
+        url += "/onecall?lat=";
         url += m_latitude;
         url += "&lon=";
         url += m_longitude;
